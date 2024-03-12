@@ -40,8 +40,16 @@ int test_ints() {
   return 0;
 }
 
+int test_set_get() {
+  Array<int> ints(100);
+  ints.Set(0, 100);
+  assert(ints.At(0) == 100);
+  return 0;
+}
+
 int main() {
   int result = 0;
+  result += test_set_get();
   result += test_ints();
   result += test_struct();
   std::cout << "test results : " << result << std::endl;

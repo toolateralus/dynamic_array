@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 template <typename T> struct Array {
   Array() {
     array = new T[max];
@@ -16,13 +17,17 @@ template <typename T> struct Array {
   }
   
   const size_t Size() const { return this->length; }
-  const T Get(const size_t &index) const {
-    if (index >= length) {
-      throw std::runtime_error("index out of bounds: index(" +
-                               std::to_string(index) + ") length(" +
-                               std::to_string(length) + ")");
-    }
+  const T At(const size_t &index) const {
+    ThrowIfOOB(index);
     return array[index];
+  }
+  void Set(const size_t &index, const T &element) {
+    ThrowIfOOB(index);
+    // if this element is a pointer we free it.
+    if constexpr (std::is_pointer_v<T>) {
+      delete array[index];
+    }
+    array[index] = element;
   }
   const void Push(const T &element) {
     if (length >= max) {
@@ -64,6 +69,13 @@ private:
   void Shrink() {
     max -= 100;
     this->array = ResizeAndMove(length, max, this->array);
+  }
+  const void ThrowIfOOB(const size_t &index) const {
+    if (index > length) {
+      throw std::runtime_error("index out of bounds: index(" +
+                                std::to_string(index) + ") length(" +
+                                std::to_string(length) + ")");
+    }
   }
   static constexpr size_t INIT_MAX = 10;
   size_t max = INIT_MAX;
